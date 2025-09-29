@@ -14,8 +14,6 @@ import { detectText } from "./hooks/useDetectText";
 
 const TARGET_FPS = 1;
 
-const BANNED_WORDS = ["NIK", "Nama"];
-
 export default function App() {
   const device = useCameraDevice("back");
   const { hasPermission } = useCameraPermission();
@@ -23,44 +21,35 @@ export default function App() {
   if (!hasPermission) return <PermissionsPage />;
   if (device == null) return <NoCameraDeviceError />;
 
-  const format = useCameraFormat(device, [
-    { videoResolution: { width: 1920, height: 1080 } },
-  ]);
-
   const frameProcessor = useFrameProcessor((frame) => {
     "worklet";
     runAtTargetFps(TARGET_FPS, () => {
       "worklet";
       runAsync(frame, () => {
         "worklet";
-        const textBlocks = detectText(frame);
-        let printcount = 0;
-        if (textBlocks && textBlocks.length > 0) {
+        const textLines = detectText(frame);
+        if (textLines && textLines.length > 0) {
           console.log("");
           console.log("");
           console.log("");
           console.log("");
           console.log("");
           console.log("=== Text Detection Results ===");
-          textBlocks.forEach((block, blockIndex) => {
-            // console.log(`Block ${blockIndex + 1}:`);
-            // console.log(`  Text: "${block.text}"`);
-
-            if (block.lines && block.lines.length > 0) {
-              // console.log(`  Lines (${block.lines.length}):`);
-              block.lines.forEach((line, lineIndex) => {
-                if (printcount > 5) {
-                  return;
-                }
-                if (BANNED_WORDS.includes(line.text)) {
-                  return;
-                }
-                console.log(`    Line ${lineIndex + 1}: "${line.text}"`);
-                printcount++;
-              });
+          textLines.forEach((line, lineIndex) => {
+            if (line.text === "NIK") {
+              console.log(
+                `\x1b[32m    Line ${lineIndex + 1}: "${line.text}"\x1b[0m`
+              );
+            } else if (line.text === "Nama") {
+              console.log(
+                `\x1b[31m    Line ${lineIndex + 1}: "${line.text}"\x1b[0m`
+              );
+            } else {
+              console.log(`    Line ${lineIndex + 1}: "${line.text}"`);
             }
           });
           console.log("==============================");
+          console.log(`Frame: ${frame.width}x${frame.height}`);
           console.log("");
           console.log("");
           console.log("");
@@ -79,7 +68,6 @@ export default function App() {
       style={styles.camera}
       device={device}
       isActive={true}
-      format={format}
       zoom={1.5}
       outputOrientation="preview"
     />
