@@ -27,32 +27,76 @@ export default function App() {
       "worklet";
       runAsync(frame, () => {
         "worklet";
-        const textLines = detectText(frame);
-        if (textLines && textLines.length > 0) {
-          console.log("");
-          console.log("");
-          console.log("");
+
+        /**
+         * Determines if bbox2 is horizontally inline with bbox1 (anchor) and to the right of the offset
+         * @param {Object} bbox1 - Anchor bounding box with properties: left, top, right, bottom
+         * @param {Object} bbox2 - Second bounding box with properties: left, top, right, bottom
+         * @param {number} offsetX - Horizontal offset as percentage of bbox1 width (default: 0)
+         * @param {number} offsetY - Vertical offset as percentage of bbox1 height (default: 0)
+         * @param {number} threshold - Vertical overlap threshold (default: 0.5, represents 50% overlap)
+         * @returns {boolean} - True if bbox2 is inline with offset anchor AND to the right of offset
+         */
+        function isHorizontallyInline(
+          bbox1,
+          bbox2,
+          offsetX = 0,
+          offsetY = 0,
+          threshold = 0.5
+        ) {
+          // Calculate bbox1 dimensions
+          const width1 = bbox1.right - bbox1.left;
+          const height1 = bbox1.bottom - bbox1.top;
+
+          // Calculate the offset position
+          const offsetXPosition = bbox1.left + offsetX * width1;
+
+          // Check if bbox2 is to the right of the offset position
+          if (bbox2.left < offsetXPosition) {
+            return false;
+          }
+
+          // Apply relative offset to bbox1 to create adjusted anchor position
+          const adjustedBbox1 = {
+            left: bbox1.left + offsetX * width1,
+            top: bbox1.top + offsetY * height1,
+            right: bbox1.right + offsetX * width1,
+            bottom: bbox1.bottom + offsetY * height1,
+          };
+
+          // Calculate the height of each bbox
+          const adjustedHeight1 = adjustedBbox1.bottom - adjustedBbox1.top;
+          const height2 = bbox2.bottom - bbox2.top;
+
+          // Calculate vertical overlap
+          const overlapTop = Math.max(adjustedBbox1.top, bbox2.top);
+          const overlapBottom = Math.min(adjustedBbox1.bottom, bbox2.bottom);
+          const overlapHeight = Math.max(0, overlapBottom - overlapTop);
+
+          // Check if there's significant vertical overlap
+          const minHeight = Math.min(adjustedHeight1, height2);
+          const overlapRatio = overlapHeight / minHeight;
+
+          return overlapRatio >= threshold;
+        }
+
+        const lines = detectText(frame);
+        if (lines && lines.length > 0) {
           console.log("");
           console.log("");
           console.log("=== Text Detection Results ===");
-          textLines.forEach((line, lineIndex) => {
-            if (line.text === "NIK") {
-              console.log(
-                `\x1b[32m    Line ${lineIndex + 1}: "${line.text}"\x1b[0m`
-              );
-            } else if (line.text === "Nama") {
-              console.log(
-                `\x1b[31m    Line ${lineIndex + 1}: "${line.text}"\x1b[0m`
-              );
-            } else {
-              console.log(`    Line ${lineIndex + 1}: "${line.text}"`);
-            }
-          });
+          const anchor = lines.find((line) => line.text === "NIK");
+          if (anchor) {
+            lines.forEach((line) => {
+              if (
+                isHorizontallyInline(anchor.bbox, line.bbox, 2.7, 1.4, 0.75) //getIdentityName
+              ) {
+                console.log(line.text);
+              }
+            });
+          }
           console.log("==============================");
           console.log(`Frame: ${frame.width}x${frame.height}`);
-          console.log("");
-          console.log("");
-          console.log("");
           console.log("");
           console.log("");
         } else {
