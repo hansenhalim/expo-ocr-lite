@@ -92,7 +92,7 @@ export default function App() {
             lines.forEach((line) => {
               // console.log(line);
               if (
-                isHorizontallyInline(anchor, line, 3.4, 1.1, 0.5) //getIdentityName
+                isHorizontallyInline(anchor, line, 2.6, 1.3) //isIdentityName
               ) {
                 console.log(line.text);
               }
