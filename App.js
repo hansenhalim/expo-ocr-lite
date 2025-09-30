@@ -29,24 +29,25 @@ export default function App() {
         "worklet";
 
         /**
-         * Determines if bbox2 is horizontally inline with bbox1 (anchor) and to the right of the offset
-         * @param {Object} bbox1 - Anchor bounding box with properties: left, top, right, bottom
-         * @param {Object} bbox2 - Second bounding box with properties: left, top, right, bottom
-         * @param {number} offsetX - Horizontal offset as percentage of bbox1 width (default: 0)
-         * @param {number} offsetY - Vertical offset as percentage of bbox1 height (default: 0)
+         * Determines if line2 is horizontally inline with line1 (anchor) and to the right of the offset
+         * @param {Object} line1 - Anchor line object with properties: bbox {left, top, right, bottom}, width, height
+         * @param {Object} line2 - Second line object with properties: bbox {left, top, right, bottom}, width, height
+         * @param {number} offsetX - Horizontal offset as percentage of line1 width (default: 0)
+         * @param {number} offsetY - Vertical offset as percentage of line1 height (default: 0)
          * @param {number} threshold - Vertical overlap threshold (default: 0.5, represents 50% overlap)
-         * @returns {boolean} - True if bbox2 is inline with offset anchor AND to the right of offset
+         * @returns {boolean} - True if line2 is inline with offset anchor AND to the right of offset
          */
         function isHorizontallyInline(
-          bbox1,
-          bbox2,
+          line1,
+          line2,
           offsetX = 0,
           offsetY = 0,
           threshold = 0.5
         ) {
-          // Calculate bbox1 dimensions
-          const width1 = bbox1.right - bbox1.left;
-          const height1 = bbox1.bottom - bbox1.top;
+          const bbox1 = line1.bbox;
+          const bbox2 = line2.bbox;
+          const width1 = line1.width;
+          const height1 = line1.height;
 
           // Calculate the offset position
           const offsetXPosition = bbox1.left + offsetX * width1;
@@ -66,7 +67,7 @@ export default function App() {
 
           // Calculate the height of each bbox
           const adjustedHeight1 = adjustedBbox1.bottom - adjustedBbox1.top;
-          const height2 = bbox2.bottom - bbox2.top;
+          const height2 = line2.height;
 
           // Calculate vertical overlap
           const overlapTop = Math.max(adjustedBbox1.top, bbox2.top);
@@ -87,9 +88,11 @@ export default function App() {
           console.log("=== Text Detection Results ===");
           const anchor = lines.find((line) => line.text === "NIK");
           if (anchor) {
+            console.log(anchor);
             lines.forEach((line) => {
+              // console.log(line);
               if (
-                isHorizontallyInline(anchor.bbox, line.bbox, 2.7, 1.4, 0.75) //getIdentityName
+                isHorizontallyInline(anchor, line, 3.4, 1.1, 0.5) //getIdentityName
               ) {
                 console.log(line.text);
               }
@@ -112,8 +115,6 @@ export default function App() {
       style={styles.camera}
       device={device}
       isActive={true}
-      zoom={1.5}
-      outputOrientation="preview"
     />
   );
 }

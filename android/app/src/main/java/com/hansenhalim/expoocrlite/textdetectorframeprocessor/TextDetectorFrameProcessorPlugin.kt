@@ -24,12 +24,19 @@ class TextDetectorFrameProcessorPlugin(proxy: VisionCameraProxy, options: Map<St
         for (line in block.lines) {
           val lineMap = mutableMapOf<String, Any>()
           lineMap["text"] = line.text
+
+          val bbox = line.boundingBox
           lineMap["bbox"] = mapOf(
-            "left" to (line.boundingBox?.left ?: 0),
-            "top" to (line.boundingBox?.top ?: 0),
-            "right" to (line.boundingBox?.right ?: 0),
-            "bottom" to (line.boundingBox?.bottom ?: 0)
+            "left" to (bbox?.left ?: 0),
+            "top" to (bbox?.top ?: 0),
+            "right" to (bbox?.right ?: 0),
+            "bottom" to (bbox?.bottom ?: 0)
           )
+
+          lineMap["width"] = bbox?.width() ?: 0
+          lineMap["height"] = bbox?.height() ?: 0
+          lineMap["angle"] = (line.angle ?: 0.0f).toDouble()
+
           result.add(lineMap)
         }
       }
