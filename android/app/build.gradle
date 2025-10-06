@@ -182,4 +182,7 @@ dependencies {
 
     // ML Kit Text Recognition
     implementation 'com.google.mlkit:text-recognition:16.0.1'
+
+    // Tesseract OpenMP variant
+    implementation 'cz.adaptech.tesseract4android:tesseract4android-openmp:4.9.0'
 }

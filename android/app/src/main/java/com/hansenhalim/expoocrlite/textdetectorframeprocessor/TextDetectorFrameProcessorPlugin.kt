@@ -8,9 +8,7 @@ import com.mrousavy.camera.frameprocessors.FrameProcessorPlugin
 import com.mrousavy.camera.frameprocessors.VisionCameraProxy
 
 class TextDetectorFrameProcessorPlugin(proxy: VisionCameraProxy, options: Map<String, Any>?): FrameProcessorPlugin() {
-
   private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-
   override fun callback(frame: Frame, arguments: Map<String, Any>?): Any? {
     val image = InputImage.fromMediaImage(frame.image, 90)
 
